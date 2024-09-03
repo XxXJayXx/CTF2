@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Do you know how to play (My chess) LOL</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #222;
+            color: white;
+            font-family: Arial, sans-serif;
+            flex-direction: column;
+        }
+        #board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            gap: 2px;
+            margin-bottom: 20px;
+        }
+        .square {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .white { background-color: #f0d9b5; }
+        .black { background-color: #b58863; }
+        .piece { cursor: move; }
+        #message { margin-top: 20px; font-size: 24px; text-align: center; }
+        #flag { display: none; color: #00ff00; font-size: 24px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<h1>Do you know how to play (My chess) LOL</h1>
+<div id="board"></div>
+<div id="message">Make your move. But be careful!</div>
+<div id="flag"></div>
+
+<script>
+    const boardElement = document.getElementById('board');
+    const messageElement = document.getElementById('message');
+    const flagElement = document.getElementById('flag');
+    let hasMoved = false;
+
+    // رسائل التوبيخ
+    const insults = [
+        "You're stupid! 🤦‍♂️ Try again!",
+        "Seriously? 🤷‍♂️ Try again!",
+        "Are you kidding me? 😒 Try again!",
+        "That was a dumb move! 🤦‍♀️ Try again!",
+        "Wow, do you even know chess? 😂 Try again!"
+    ];
+
+    // القطع بترميز اليونيكود
+    const pieces = {
+        'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙',
+        'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟'
+    };
+
+    const initialBoard = [
+        ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
+        ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+        ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+    ];
+
+    function initBoard() {
+        for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+                const square = document.createElement('div');
+                square.classList.add('square', (i + j) % 2 === 0 ? 'white' : 'black');
+                const piece = initialBoard[i][j];
+                if (piece) {
+                    const pieceElement = document.createElement('span');
+                    pieceElement.textContent = pieces[piece];
+                    pieceElement.classList.add('piece');
+                    pieceElement.draggable = true;
+                    pieceElement.addEventListener('dragstart', handleDragStart);
+                    square.appendChild(pieceElement);
+                }
+                square.addEventListener('dragover', handleDragOver);
+                square.addEventListener('drop', handleDrop);
+                boardElement.appendChild(square);
+            }
+        }
+    }
+
+    function handleDragStart(event) {
+        if (hasMoved) return;
+        event.dataTransfer.setData('text', event.target.textContent);
+        event.target.id = 'dragging';
+    }
+
+    function handleDragOver(event) {
+        event.preventDefault();
+    }
+
+    function handleDrop(event) {
+        event.preventDefault();
+        const draggedPiece = document.getElementById('dragging');
+        if (!draggedPiece) return;
+        const targetSquare = event.target;
+        if (targetSquare.classList.contains('piece')) return;
+        hasMoved = true;
+
+        if (draggedPiece.textContent === pieces['N'] || draggedPiece.textContent === pieces['n']) {
+            showFlag();
+        } else {
+            showInsult();
+            setTimeout(resetGame, 5000); // إعادة تعيين اللعبة بعد 5 ثوانٍ
+        }
+
+        draggedPiece.remove();
+        targetSquare.appendChild(draggedPiece);
+    }
+
+    function showInsult() {
+        const randomIndex = Math.floor(Math.random() * insults.length);
+        messageElement.textContent = insults[randomIndex];
+        messageElement.style.fontSize = '30px';
+    }
+
+    function showFlag() {
+        flagElement.textContent = "Fun? Ok sorry. There is no flag here, but maybe in our acc on X";
+        flagElement.style.display = 'block';
+    }
+
+    function resetGame() {
+        boardElement.innerHTML = '';
+        messageElement.textContent = "Make your move. But be careful!";
+        messageElement.style.fontSize = '24px';
+        flagElement.style.display = 'none';
+        hasMoved = false;
+        initBoard();
+    }
+
+    initBoard();
+</script>
+
+</body>
+</html>
